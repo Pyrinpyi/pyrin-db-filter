@@ -4,7 +4,7 @@ ARG REPO_DIR
 
 EXPOSE 8000
 
-ENV KASPAD_HOST_1=n.seeder1.kaspad.net:16110
+ENV PYIPAD_HOST_1=n.seeder1.pyipad.net:16110
 ENV SQL_URI=postgresql+asyncpg://postgres:password@postgresql:5432/postgres
 ARG version
 ENV VERSION=$version
@@ -34,4 +34,7 @@ RUN pipenv install --deploy
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 
-CMD pipenv run python main.py
+RUN pip install sqlalchemy==1.4.41 grpcio psycopg2 google-api-python-client
+
+# CMD pipenv run python main.py
+CMD python main.py

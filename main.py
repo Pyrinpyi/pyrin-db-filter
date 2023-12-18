@@ -9,7 +9,8 @@ from TxAddrMappingUpdater import TxAddrMappingUpdater
 from VirtualChainProcessor import VirtualChainProcessor
 from dbsession import create_all
 from helper import KeyValueStore
-from kaspad.KaspadMultiClient import KaspadMultiClient
+from pyrin.PyipadMultiClient import PyipadMultiClient
+# from pyrin.PyipadClient import PyipadClient
 
 logging.basicConfig(format="%(asctime)s::%(levelname)s::%(name)s::%(message)s",
                     level=logging.DEBUG if os.getenv("DEBUG", False) else logging.INFO,
@@ -26,35 +27,37 @@ _logger = logging.getLogger(__name__)
 
 # create tables in database
 _logger.info('Creating DBs if not exist.')
-create_all(drop=False)
+# create_all(drop=False)
 
-kaspad_hosts = []
+pyipad_hosts = []
 
 for i in range(100):
     try:
-        kaspad_hosts.append(os.environ[f"KASPAD_HOST_{i + 1}"].strip())
+        pyipad_hosts.append(os.environ[f"PYIPAD_HOST_{i + 1}"].strip())
     except KeyError:
         break
 
-if not kaspad_hosts:
-    raise Exception('Please set at least KASPAD_HOST_1 environment variable.')
+if not pyipad_hosts:
+    raise Exception('Please set at least PYIPAD_HOST_1 environment variable.')
 
-# create Kaspad client
-client = KaspadMultiClient(kaspad_hosts)
+# create Pyipad client
+client = PyipadMultiClient(pyipad_hosts)
+# client = PyipadClient("10.1.0.4", 13110)
 task_runner = None
 
 
 async def main():
-    # initialize kaspads
+    # initialize pyipads
     await client.initialize_all()
 
     # wait for client to be synced
-    while client.kaspads[0].is_synced == False:
+    while client.pyipads[0].is_synced == False:
         _logger.info('Client not synced yet. Waiting...')
         time.sleep(60)
 
     # find last acceptedTx's block hash, when restarting this tool
     start_hash = KeyValueStore.get("vspc_last_start_hash")
+    start_hash = "57b45e905202603bcb085d219f11a37e77a50e8fd3a0010441401f86d55e83fd"
 
     # if there is nothing in the db, just get latest block.
     if not start_hash:
@@ -92,7 +95,6 @@ async def main():
 
 if __name__ == '__main__':
     tx_addr_mapping_updater = TxAddrMappingUpdater()
-
 
     # custom exception hook for thread
     def custom_hook(args):
