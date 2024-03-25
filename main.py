@@ -57,7 +57,6 @@ async def main():
 
     # find last acceptedTx's block hash, when restarting this tool
     start_hash = KeyValueStore.get("vspc_last_start_hash")
-    start_hash = "58c2d4199e21f910d1571d114969cecef48f9f934d42ccb6a281a15868f2999"
 
     # if there is nothing in the db, just get latest block.
     if not start_hash:
